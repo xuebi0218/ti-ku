@@ -2,7 +2,7 @@
 
 > 247题 · 17个知识模块 · 答案来自智慧树官方参考答案 · v2
 
-🔗 在线访问：https://xuebi.github.io/ti-ku/https://xuebi0218.github.io/ti-ku/
+🔗 在线访问：https://xuebi0218.github.io/ti-ku/
 
 ## 功能
 - 🔍 实时搜索题目、答案、解析
