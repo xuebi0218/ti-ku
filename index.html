@@ -677,6 +677,7 @@ let currentType = 'all';
 let searchTerm = '';
 let hideAnswers = false;
 let shuffleMode = false;
+let sortMode = 'module'; // 'module' = 智慧树模块顺序, 'alpha' = 首字母排序
 let currentPage = 1;
 const PAGE_SIZE = 50;
 let bookmarks = [];
@@ -786,6 +787,22 @@ function getFilteredQuestions() {
       q.explanation.toLowerCase().includes(s) ||
       q.module.toLowerCase().includes(s)
     );
+  }
+  // Sort: default = 智慧树模块顺序, alpha = 首字母排序
+  if (sortMode === 'alpha') {
+    qs = [...qs].sort((a, b) => a.module.localeCompare(b.module, 'zh'));
+  } else {
+    // 智慧树模块顺序：按 course.modules 中的索引排序
+    const modules = currentCourse ? getModules(currentCourse) : [];
+    if (modules.length > 0) {
+      const orderMap = {};
+      modules.forEach((m, i) => { orderMap[m] = i; });
+      qs = [...qs].sort((a, b) => {
+        const oa = orderMap[a.module] !== undefined ? orderMap[a.module] : 999;
+        const ob = orderMap[b.module] !== undefined ? orderMap[b.module] : 999;
+        return oa - ob;
+      });
+    }
   }
   return qs;
 }
@@ -1019,6 +1036,7 @@ function renderMain() {
       ${modules.map(m => `<option value="${m.replace(/"/g,'&quot;')}"${currentModule===m?' selected':''}>${escapeHtml(m)}</option>`).join('')}
     </select>
     <button class="filter-btn" id="btnShuffle" onclick="toggleShuffle()" aria-pressed="${shuffleMode}" title="随机打乱题目顺序">🔀 随机</button>
+    <button class="filter-btn" id="btnSort" onclick="toggleSort()" title="切换排序方式">📋 ${sortMode==='module'?'模块序':'字母序'}</button>
     <button class="filter-btn" id="btnHideAnswer" onclick="toggleHideAnswer()" aria-pressed="${hideAnswers}" title="隐藏答案用于自测">🙈 ${hideAnswers?'显示':'隐藏'}答案</button>
     <button class="filter-btn" id="btnBookmarked" onclick="showBookmarked()" title="只看收藏的题目">⭐ 收藏</button>
   </div>`;
@@ -1133,6 +1151,15 @@ function toggleShuffle() {
   const btn = document.getElementById('btnShuffle');
   if (btn) btn.textContent = shuffleMode ? '🔀 顺序' : '🔀 随机';
   if (btn) btn.classList.toggle('active', shuffleMode);
+  document.querySelector('.main-body').scrollTop = 0;
+  renderQuestionList();
+}
+
+function toggleSort() {
+  sortMode = sortMode === 'module' ? 'alpha' : 'module';
+  currentPage = 1;
+  const btn = document.getElementById('btnSort');
+  if (btn) btn.textContent = sortMode === 'module' ? '📋 模块序' : '📋 字母序';
   document.querySelector('.main-body').scrollTop = 0;
   renderQuestionList();
 }
